@@ -1,6 +1,0 @@
-DB_TYPE=postgress
-DB_HOST=127.0.0.1
-DB_POST=3306
-DB_USERNAME=root
-DB_PASSWORD=root
-DB_DATABASE=nest-events
