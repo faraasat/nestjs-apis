@@ -1,34 +1,56 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { EventsController } from './events/events.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Event } from './events/entities/events.entity';
+import { EventsModule } from './events/events.module';
+import { AppDummy } from './app.dummy';
+import { AppJapanService } from './app.japan.service';
+import ormConfig from './config/orm.config';
+import ormConfigProd from './config/orm.config.prod';
+// import { AppJapanService } from './app.japan.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({}),
-    TypeOrmModule.forRoot({
-      type: (process.env.DB_TYPE as any) || 'postgres',
-      host: process.env.DB_HOST || '127.0.0.1',
-      port: (!isNaN(+process.env.DB_POST) && +process.env.DB_POST) || 3306,
-      username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || 'root',
-      database: process.env.DB_DATABASE || 'nest-events',
-      entities: [Event],
-      synchronize: true, // do not use on production
-      ssl: {
-        rejectUnauthorized: false,
-        requestCert: true,
-      },
-      extra: {
-        sslmode: 'required ',
-      },
+    ConfigModule.forRoot({
+      isGlobal: true, // so we don't have to re import in other modules
+      envFilePath: '.env',
+      load: [ormConfig, ormConfigProd], // to load the config
+      expandVariables: true, // will fill the variables in env
     }),
-    TypeOrmModule.forFeature([Event]), // for repository
+    // TypeOrmModule.forRoot({
+    //  // values to pass
+    // }),
+    // forRootAsyn when using config files
+    TypeOrmModule.forRootAsync({
+      useFactory:
+        process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
+    }),
+    EventsModule,
   ],
-  controllers: [AppController, EventsController],
-  providers: [AppService],
+  controllers: [AppController],
+  // there are many ways to provide a provider
+  // 1st way, pass the provider
+  // providers: [AppService],
+  // 2nd way, use object and in this way we can pass a different provider by keeping the same name
+  providers: [
+    {
+      provide: AppService,
+      // useClass: AppService,
+      useClass: AppJapanService, // if passed we will get hello world in japanese
+    },
+    {
+      // we can inject this value by using the name in the Inject decorator
+      provide: 'APP_NAME',
+      useValue: 'Nest Events Backend!',
+    },
+    {
+      provide: 'MESSAGE',
+      inject: [AppDummy],
+      useFactory: (app) => `${app.dummy()} Factory`,
+    },
+    AppDummy,
+  ],
 })
 export class AppModule {}

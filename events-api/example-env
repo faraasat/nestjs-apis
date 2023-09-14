@@ -4,3 +4,6 @@ DB_POST=3306
 DB_USERNAME=root
 DB_PASSWORD=root
 DB_DATABASE=nest-events
+
+APP_URL=example.com
+SUPPORT_EMAIL=support@${APP_URL}

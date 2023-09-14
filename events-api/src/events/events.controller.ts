@@ -4,7 +4,10 @@ import {
   Delete,
   Get,
   HttpCode,
+  Logger,
+  NotFoundException,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -16,6 +19,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Controller('events')
 export class EventsController {
+  private readonly logger = new Logger(EventsController.name);
+
   constructor(
     @InjectRepository(Event)
     private readonly repository: Repository<Event>,
@@ -23,7 +28,10 @@ export class EventsController {
 
   @Get()
   async findAll() {
-    return await this.repository.find();
+    this.logger.log(`Hit findAll router`);
+    const events = await this.repository.find();
+    this.logger.debug(`Found ${events.length} events`);
+    return events;
   }
 
   @Get()
@@ -52,12 +60,26 @@ export class EventsController {
 
   @Get(':id')
   // if we do not write @Param('id') id and write @Param() id we will get and object like {id: "sasd"}
-  async findOne(@Param('id') id) {
-    return await this.repository.findOne({ where: { id: id } });
+  // ParseIntPipe validates and converts id into number
+  async findOne(@Param('id', ParseIntPipe) id) {
+    const event = await this.repository.findOne({ where: { id: id } });
+
+    if (!event) return new NotFoundException();
+
+    return event;
   }
 
+  // these pipes can also be written as new ValidationPipe() if passing an argument in Body @Body(ValidationPipe)
+  // but now I have put the ValidationPipe on useGlobalValidator so no need here
+  // now if we want to target a specific group in validation pipe `new ValidationPipe({ groups: ['create'] })` we will include it but you have to disable global pipe
+  // one more way to add pipe is using @UsePipes()
+  // @UsePipes()
   @Post()
-  async create(@Body() input: CreateEventDto) {
+  async create(
+    @Body()
+    input: // new ValidationPipe({ groups: ['create'] })
+    CreateEventDto,
+  ) {
     return await this.repository.save({
       ...input,
       when: new Date(input.when),
@@ -65,7 +87,12 @@ export class EventsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id, @Body() input: UpdateEventDto) {
+  async update(
+    @Param('id') id,
+    @Body()
+    input: // new ValidationPipe({ groups: ['update'] })
+    UpdateEventDto,
+  ) {
     let inputDef = {};
 
     if (input.when) {
@@ -86,6 +113,10 @@ export class EventsController {
   // to return a different response and 204 not content to return
   @HttpCode(204)
   async remove(@Param('id') id) {
-    return await this.repository.delete({ id: id });
+    const event = await this.repository.delete({ id: id });
+
+    if (!event) return new NotFoundException();
+
+    return event;
   }
 }
