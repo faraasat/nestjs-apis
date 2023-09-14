@@ -16,6 +16,7 @@ import { UpdateEventDto } from './dtos/update-event.dto';
 import { Event } from './entities/events.entity';
 import { Like, MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Attendee } from './entities/attendee.entity';
 
 @Controller('events')
 export class EventsController {
@@ -24,6 +25,8 @@ export class EventsController {
   constructor(
     @InjectRepository(Event)
     private readonly repository: Repository<Event>,
+    @InjectRepository(Attendee)
+    private readonly attendeeRepository: Repository<Attendee>,
   ) {}
 
   @Get()
@@ -34,7 +37,7 @@ export class EventsController {
     return events;
   }
 
-  @Get()
+  @Get('practice')
   // in array we have or condition in object we have and condition
   async practice() {
     return await this.repository.find({
@@ -56,6 +59,39 @@ export class EventsController {
         // description: 'ASC',
       },
     });
+  }
+
+  @Get('practice2')
+  async practice2() {
+    const event = new Event();
+    event.id = 1;
+
+    const attendee = new Attendee();
+    attendee.name = "Farasat";
+    attendee.event = event;
+
+    await this.attendeeRepository.save(attendee);
+
+    return await this.repository.findOne({
+      where: { id: 1 },
+      loadEagerRelations: true,
+      relations: ['attendees'],
+    });
+
+    /**
+     * using cascading
+     * 
+     * const event = await this.repository.findOne(1);
+     * 
+     * const attendee = new Attendee();
+     * attendee.name = "Using Cascade";
+     * event.attendees.push(attendee)
+     * 
+     * await this.repository.save(event) 
+     * 
+     * return event;
+     * 
+     */
   }
 
   @Get(':id')

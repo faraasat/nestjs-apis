@@ -13,6 +13,7 @@ export default registerAs(
     password: process.env.DB_PASSWORD || 'root',
     database: process.env.DB_DATABASE || 'nest-events',
     entities: [Event],
+    autoLoadEntities: true,
     synchronize: true, // do not use on production
     ssl: {
       rejectUnauthorized: false,
