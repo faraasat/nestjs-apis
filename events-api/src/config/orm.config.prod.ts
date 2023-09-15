@@ -1,6 +1,9 @@
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { Attendee } from 'src/events/entities/attendee.entity';
 import { Event } from 'src/events/entities/events.entity';
+import { Subject } from 'src/school/subject.entity';
+import { Teacher } from 'src/school/teacher.entity';
 
 // this is called default factory function
 export default registerAs(
@@ -12,7 +15,7 @@ export default registerAs(
     username: process.env.DB_USERNAME || 'root',
     password: process.env.DB_PASSWORD || 'root',
     database: process.env.DB_DATABASE || 'nest-events',
-    entities: [Event],
+    entities: [Event, Attendee, Subject, Teacher],
     autoLoadEntities: true,
     synchronize: false, // do not use on production
     ssl: {

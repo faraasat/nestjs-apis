@@ -9,6 +9,7 @@ import { AppDummy } from './app.dummy';
 import { AppJapanService } from './app.japan.service';
 import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
+import { SchoolModule } from './school/school.module';
 // import { AppJapanService } from './app.japan.service';
 
 @Module({
@@ -28,6 +29,7 @@ import ormConfigProd from './config/orm.config.prod';
         process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
     }),
     EventsModule,
+    SchoolModule,
   ],
   controllers: [AppController],
   // there are many ways to provide a provider
