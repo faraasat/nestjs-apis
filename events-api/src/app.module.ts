@@ -14,6 +14,8 @@ import { SchoolModule } from './school/school.module';
 
 @Module({
   imports: [
+    EventsModule,
+    SchoolModule,
     ConfigModule.forRoot({
       isGlobal: true, // so we don't have to re import in other modules
       envFilePath: '.env',
@@ -28,8 +30,6 @@ import { SchoolModule } from './school/school.module';
       useFactory:
         process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
     }),
-    EventsModule,
-    SchoolModule,
   ],
   controllers: [AppController],
   // there are many ways to provide a provider

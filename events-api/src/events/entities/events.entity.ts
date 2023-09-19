@@ -30,4 +30,10 @@ export class Event {
     // }
   )
   attendees: Attendee[];
+
+  // these all are virtual properties that are never stored
+  attendeeCount?: number;
+  attendeeRejected?: number;
+  attendeeMaybe?: number;
+  attendeeAccepted?: number;
 }

@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { UpdateEventDto } from './dtos/update-event.dto';
@@ -17,6 +18,8 @@ import { Event } from './entities/events.entity';
 import { Like, MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Attendee } from './entities/attendee.entity';
+import { EventsService } from './events.service';
+import { ListEvents } from './dtos/list.event';
 
 @Controller('events')
 export class EventsController {
@@ -27,10 +30,12 @@ export class EventsController {
     private readonly repository: Repository<Event>,
     @InjectRepository(Attendee)
     private readonly attendeeRepository: Repository<Attendee>,
+    // @InjectRepository(EventsService)
+    private readonly eventsService: EventsService,
   ) {}
 
   @Get()
-  async findAll() {
+  async findAll(@Query() filter: ListEvents) {
     this.logger.log(`Hit findAll router`);
     const events = await this.repository.find();
     this.logger.debug(`Found ${events.length} events`);
@@ -67,7 +72,7 @@ export class EventsController {
     event.id = 1;
 
     const attendee = new Attendee();
-    attendee.name = "Farasat";
+    attendee.name = 'Farasat';
     attendee.event = event;
 
     await this.attendeeRepository.save(attendee);
@@ -80,17 +85,17 @@ export class EventsController {
 
     /**
      * using cascading
-     * 
+     *
      * const event = await this.repository.findOne(1);
-     * 
+     *
      * const attendee = new Attendee();
      * attendee.name = "Using Cascade";
      * event.attendees.push(attendee)
-     * 
-     * await this.repository.save(event) 
-     * 
+     *
+     * await this.repository.save(event)
+     *
      * return event;
-     * 
+     *
      */
   }
 
@@ -98,7 +103,8 @@ export class EventsController {
   // if we do not write @Param('id') id and write @Param() id we will get and object like {id: "sasd"}
   // ParseIntPipe validates and converts id into number
   async findOne(@Param('id', ParseIntPipe) id) {
-    const event = await this.repository.findOne({ where: { id: id } });
+    // const event = await this.repository.findOne({ where: { id: id } });
+    const event = this.eventsService.getEvent(id);
 
     if (!event) return new NotFoundException();
 
