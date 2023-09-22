@@ -3,19 +3,21 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { Event } from './events/entities/events.entity';
 import { EventsModule } from './events/events.module';
 import { AppDummy } from './app.dummy';
 import { AppJapanService } from './app.japan.service';
 import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
 import { SchoolModule } from './school/school.module';
+import { AuthModule } from './auth/auth.module';
+// import { Event } from './events/entities/events.entity';
 // import { AppJapanService } from './app.japan.service';
 
 @Module({
   imports: [
     EventsModule,
     SchoolModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true, // so we don't have to re import in other modules
       envFilePath: '.env',
