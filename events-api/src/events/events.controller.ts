@@ -11,6 +11,8 @@ import {
   Patch,
   Post,
   Query,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { UpdateEventDto } from './dtos/update-event.dto';
@@ -35,10 +37,19 @@ export class EventsController {
   ) {}
 
   @Get()
+  @UsePipes(new ValidationPipe({ transform: true })) // trick to make the classes pre-populate in the query
   async findAll(@Query() filter: ListEvents) {
-    this.logger.log(`Hit findAll router`);
-    const events = await this.repository.find();
-    this.logger.debug(`Found ${events.length} events`);
+    // this.logger.log(`Hit findAll router`);
+    // const events = await this.repository.find();
+    // const events =
+    //   await this.eventsService.getEventsWithAttendeeCountFiltered();
+    // this.logger.debug(`Found ${events.length} events`);
+    const events =
+      this.eventsService.getEventsWithAttendeeCountFilteredPaginated(filter, {
+        total: true,
+        currentPage: filter.page,
+        limit: 10,
+      });
     return events;
   }
 
@@ -155,10 +166,11 @@ export class EventsController {
   // to return a different response and 204 not content to return
   @HttpCode(204)
   async remove(@Param('id') id) {
-    const event = await this.repository.delete({ id: id });
+    // const event = await this.repository.delete({ id: id });
+    // if (!event) return new NotFoundException();
+    // return event;
 
-    if (!event) return new NotFoundException();
-
-    return event;
+    const result = await this.eventsService.deleteEvent(id);
+    if (result.affected !== 1) return new NotFoundException();
   }
 }
