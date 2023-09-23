@@ -6,6 +6,9 @@ import { Event } from './entities/events.entity';
 import { AttendeeAnswerEnum } from './entities/attendee.entity';
 import { ListEvents, WhenEventFilter } from './dtos/list.event';
 import { PaginateOptions, paginate } from 'src/pagination/paginator';
+import { CreateEventDto } from './dtos/create-event.dto';
+import { User } from 'src/auth/entities/user.entity';
+import { UpdateEventDto } from './dtos/update-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -107,6 +110,25 @@ export class EventsService {
             answer: AttendeeAnswerEnum.Rejected,
           }),
       );
+  }
+
+  public async createEvent(input: CreateEventDto, user: User): Promise<Event> {
+    return this.eventsRepository.save({
+      ...input,
+      organizer: user,
+      when: new Date(input.when),
+    });
+  }
+
+  public async updateEvent(
+    event: Event,
+    input: UpdateEventDto,
+  ): Promise<Event> {
+    return this.eventsRepository.save({
+      ...event,
+      ...input,
+      when: input.when ? new Date(input.when) : event.when,
+    });
   }
 
   public async deleteEvent(id: number): Promise<DeleteResult> {

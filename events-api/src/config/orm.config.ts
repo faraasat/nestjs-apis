@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { Profile } from 'src/auth/profile.entity';
-import { User } from 'src/auth/user.entity';
+import { Profile } from 'src/auth/entities/profile.entity';
+import { User } from 'src/auth/entities/user.entity';
 import { Attendee } from 'src/events/entities/attendee.entity';
 import { Event } from 'src/events/entities/events.entity';
 import { Subject } from 'src/school/subject.entity';
