@@ -128,7 +128,7 @@ export class EventsController {
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     // const event = await this.repository.findOne({ where: { id: id } })s;
-    const event = await this.eventsService.getEvent(id);
+    const event = await this.eventsService.getEventWithAttendeeCount(id);
 
     if (!event) return new NotFoundException();
 
@@ -161,7 +161,7 @@ export class EventsController {
   @UseGuards(AuthGuardJwt)
   @UseInterceptors(ClassSerializerInterceptor)
   async update(
-    @Param('id') id,
+    @Param('id', ParseIntPipe) id,
     @Body()
     input: // new ValidationPipe({ groups: ['update'] })
     UpdateEventDto,
@@ -183,7 +183,7 @@ export class EventsController {
     // );
 
     // const event = await this.repository.findOne({ where: { id: id } });
-    const event = await this.eventsService.getEvent(id);
+    const event = await this.eventsService.findOne(id);
 
     if (!event) throw new NotFoundException();
 
@@ -200,7 +200,10 @@ export class EventsController {
   // to return a different response and 204 not content to return
   @HttpCode(204)
   @UseGuards(AuthGuardJwt)
-  async remove(@Param('id') id: number, @CurrentUser() user: User) {
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: User,
+  ) {
     // const event = await this.repository.delete({ id: id });
     // if (!event) return new NotFoundException();
     // return event;
@@ -209,7 +212,7 @@ export class EventsController {
     // if (result.affected !== 1) return new NotFoundException();
 
     // const event = await this.repository.findOne({ where: { id: id } });
-    const event = await this.eventsService.getEvent(id);
+    const event = await this.eventsService.findOne(id);
 
     if (!event) throw new NotFoundException();
 
